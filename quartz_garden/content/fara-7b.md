@@ -1,10 +1,15 @@
-Here is a complete technical blog post summarizing your journey. You can save this as a `README.md` or share it as a guide for others with similar setups (RTX 3060 + Windows).
-
+---
+title: "Running Fara-7B on RTX 3060"
+tags:
+  - ML
+  - Windows
+  - WSL
+  - Fara-7B
 ---
 
 # How to Run Microsoft Fara-7B Agent on Windows (RTX 3060)
 
-This guide dzocuments the method for running Microsoft's [Fara-7B](https://github.com/microsoft/fara) computer-use agent on a consumer PC. The challenge was running a heavy Vision-Language Model on a 12GB VRAM card (RTX 3060) and a modest CPU (Intel Pentium Gold), avoiding complex Linux compilations by using a hybrid **Windows Server + WSL Client** setup.
+In this guide, I document how I ran Microsoft's [Fara-7B](https://github.com/microsoft/fara) computer-use agent on a my strange PC config. The issue was running a Vision-Language Model on a 12GB VRAM card (RTX 3060) and a my Pentium CPU (Intel Pentium Gold :/). I did it just as a trial run to see the potential of such models locally.
 
 ## 🛠 The Hardware Setup
 
@@ -27,7 +32,7 @@ The original Fara-7B model (~15GB) is too big for a 12GB card. I used **GGUF** q
 
 **Repositories Used:**
 
-* **Model:** [`mradermacher/Fara-7B-GGUF`](https://www.google.com/search?q=%5Bhttps://huggingface.co/mradermacher/Fara-7B-GGUF%5D(https://huggingface.co/mradermacher/Fara-7B-GGUF)) (I targeted `Q6_K` for quality or `Q4_K_M` for speed).
+* **Model:** [`mradermacher/Fara-7B-GGUF`](https://huggingface.co/mradermacher/Fara-7B-GGUF) (I targeted `Q6_K` for quality or `Q4_K_M` for speed).
 * **Vision Projector:** A compatible `.mmproj` file (required for the AI to "see").
 
 **Downloads (via WSL):**
@@ -45,7 +50,6 @@ huggingface-cli download mradermacher/Fara-7B-GGUF Fara-7B.Q6_K.gguf --local-dir
 
 # Download Vision Projector (Critical for screenshots)
 huggingface-cli download mradermacher/Fara-7B-GGUF Fara-7B.mmproj-f16.gguf --local-dir .
-
 ```
 
 ---
@@ -75,12 +79,7 @@ cd I:\AI\llama-b7170-bin-win-cuda-12.4-x64
   --host 0.0.0.0 `
   -ngl 99 `
   -c 8192
-
 ```
-
-* `-ngl 99`: Offload all layers to GPU.
-* `-c 8192`: 8k context window (fixes `bad allocation` errors).
-* `--port 8081`: Avoids conflict with default port 8080.
 
 ---
 
@@ -102,7 +101,6 @@ pip install -e .
 # Install Browser Engine
 playwright install
 sudo playwright install-deps  # Critical for WSL!
-
 ```
 
 **2. Networking Fix (Connecting WSL to Windows):**
@@ -112,7 +110,6 @@ Since WSL is a virtual machine, it cannot access `localhost` of the Windows host
 # Run inside WSL to find Windows Host IP
 ip route show | grep -i default | awk '{ print $3}'
 # Output example: 172.25.160.1
-
 ```
 
 **3. Agent Configuration:**
@@ -126,7 +123,6 @@ Created `endpoint_configs/windows_server.json`:
   "model_type": "chat",
   "encoding_format": "base64"
 }
-
 ```
 
 ---
@@ -141,7 +137,6 @@ fara-cli \
   --task "Go to bing.com and find the population of Canada" \
   --start_page "https://www.bing.com" \
   --endpoint_config endpoint_configs/windows_server.json
-
 ```
 
 It worked and was using my browser. The speed was fine. But need to check the accuracy of the results.
